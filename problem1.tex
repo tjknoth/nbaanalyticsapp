@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,latexsym,amsthm,amscd,float,mathtools}
+
+\def\Q{\mathbb{Q}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\N{\mathbb{N}}
+
+\title{NBA Analytics Hackathon Application}
+\author{Tristan Knoth}
+
+\begin{document}
+\maketitle
+\section*{Question 1}
+Suppose, after adding Kevin Durant, the Warriors have an 80\% chance of winning each of the 82 games they will play in the regular season. How do we compute the probability that the Warriors do not lose consecutive games over the course of the season? For generality, consider an arbitrary $N$ game season. We can approach this as a counting problem. Suppose the Warriors lose $k$ games (with $k \leq N$). Then there are $\binom{N}{k}$ ways the Warriors can lose $k$ games, where $\binom{N}{k}$ denotes the quantity "$N$ choose $k$". Counting the number of ways in which the Warriors can lose $k$ games without consecutive losses proves more subtle. Let $W$ denote a "winning streak", and let $l$ denote a single loss. Then a season can be represented as follows:
+\[ W_0\; l_1 \; W_1 \; l_2 \; W_2 \; \ldots \; W_{k-1} \; l_k \; W_k \]
+To ensure that this season meets our requirements that the Warriors do not lose consecutive games, each streak $W_1,W_2,\ldots,W_{k-1}$ must have length at least 1. Streaks $W_0$ and $W_k$, however, have no such restriction, and can have length zero. To count the number of seasons without consecutive losses, we will think of each of these $k+1$ win streaks as categories, and count the number of ways to "place" games into each streak. How do we know how many games to place into the streaks? It is certainly less than $N$. We can eliminate the $k$ games the Warriors lose. Since streaks $W_1,W_2,\ldots,W_{k-1}$ must have length at least 1, we can also eliminate $k-1$ games that we know are won between the losses. Thus, we are left with $N-k-(k-1) = N-2k-1$ wins to distribute. To distribute these wins into $k+1$ streaks we will use the standard "stars and bars" counting method (described in a section at the end). It turns out that there are $\binom{N-k+1}{k}$ ways to put the wins into streaks. Thus, in an $N$ game season in which the Warriors lose $k$ games, the probability they fail to lose consecutive games is
+\[ \frac{\binom{N-k+1}{k}}{\binom{N}{k}}\]
+However, we only know that there is an 80\% chance the Warriors win each game, not how many games the Warriors will lose in a season. Note that if the Warriors lose more than $\lceil N/2 \rceil$ games it is impossible to avoid consecutive losses (by the pigeonhole principle). The probability that the Warriors lose $k$ games is distributed binomially, as we are assuming each game is independent of all the others and there are only two possible outcomes (win and loss). Let $P(L=k)$ denote the probability the Warriors lose $k$ games. Since $L \sim \text{Binom} (N,p)$ (where here $p = .2$), by the definition of the binomial distribution we have $P(L=k) = \binom{N}{k} p^k (1-p)^{N-k}$. Thus, we can use the multiplication principle to find the following expression to compute the probability that the Warriors lose $k$ games without dropping consecutive games:
+\[ \frac{\binom{N-k+1}{k}}{\binom{N}{k}} \binom{N}{k} p^k (1-p)^{N-k} = \binom{N-k+1}{k} p^k (1-p)^{N-k}\]
+If we sum across all $k$ (and plug in values for $N$ and $p$), we get the probability that the Warriors do not lose back-to-back games:
+
+\[ \sum \limits_{k = 0}^{41} \binom{82-k+1}{k} .2^k .8^{82-k} = 0.05882\]
+
+Clearly, given our assumptions, it is unlikely that the Warriors fail to lose back-to-back games.
+
+I evaluated the formula above with a Ruby script attached to the application.
+
+\section*{The Opposite Problem}
+
+Solving the opposite problem (what percentage of games would a team have to win such that it's more likely than not that they never lose consecutive games) is most simply done to a reasonable degree of accuracy via "guess and check". An attached Ruby script automates this process.
+
+\subsection*{Stars and Bars}
+How many ways are there to distribute $N$ items into $k$ groups? We can form a simple bijection between a distribution of $N$ items into $k$ groups and an arrangement of $N$ stars and $k-1$ bars (the bars split the stars into enumerated categories). Clearly, there are $\binom{N+k-1}{k-1}$ ways to arrange $N$ stars and $k-1$ bars.
+
+\end{document}
